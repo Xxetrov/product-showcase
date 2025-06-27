@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect,use } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -17,9 +17,9 @@ interface Product{
 }
 
 interface ProductDetailProps{
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
 
 
@@ -35,6 +35,7 @@ export default function ProductDetail({ params }: ProductDetailProps) {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [favorites, setFavorites] = useState<number[]>([])
+  const resolvedParams = use(params)
 
   useEffect(() => {
     // Load favorites from memory
@@ -45,7 +46,7 @@ export default function ProductDetail({ params }: ProductDetailProps) {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const productData = await getProduct(params.slug)
+        const productData = await getProduct(resolvedParams.slug)
         setProduct(productData)
       } catch (error) {
         console.error('Error fetching product:', error)
@@ -55,10 +56,10 @@ export default function ProductDetail({ params }: ProductDetailProps) {
     }
 
     fetchProduct()
-  }, [params.slug])
+  }, [resolvedParams.slug])
 
   const toggleFavorite = (): void => {
-    const productId = parseInt(params.slug)
+    const productId = parseInt(resolvedParams.slug)
     let newFavorites: number[]
     
     if (favorites.includes(productId)) {
@@ -77,7 +78,7 @@ export default function ProductDetail({ params }: ProductDetailProps) {
     }
   }
 
-  const isFavorite: boolean = favorites.includes(parseInt(params.slug))
+  const isFavorite: boolean = favorites.includes(parseInt(resolvedParams.slug))
 
   if (loading) {
     return (
